@@ -39,6 +39,13 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:1
 .c2 .t{font-size:6.8rem;font-weight:700;line-height:1;direction:ltr}
 .c2 .d{font-size:2.2rem}
 .c2 .m{font-size:1.35rem;color:var(--mut);line-height:1.7}
+#ak{display:none;width:100%;flex:1;min-height:0;flex-direction:column;align-items:center;text-align:center;gap:.6rem}
+.c2.ak>*:not(#ak){display:none!important}.c2.ak #ak{display:flex}.c2.ak{justify-content:flex-start;padding:1rem 1.2rem}
+#ak .at2{font-size:1.2rem;color:var(--gold)}#ak .tt{font-size:2.2rem;font-weight:700;color:var(--gold);line-height:1.3}
+#ak .tx{flex:1;min-height:0;width:100%;overflow:hidden;display:flex;align-items:center;justify-content:center;line-height:1.95;font-size:2rem}
+#ak .tx.q{color:#f1e3b3}
+#ak .nn2{font-size:1.4rem;color:var(--mut)}#ak .nn2 b{color:var(--w)}
+#ak .ft{font-size:1rem;color:var(--mut);opacity:.75}
 #fc{display:none;width:100%;justify-content:space-between;border-top:1px solid rgba(214,178,94,.3);padding-top:.8rem}
 .fc{display:flex;flex-direction:column;align-items:center;gap:.1rem;font-size:1.2rem;flex:1}
 .fc u{text-decoration:none;font-size:2rem;line-height:1.3}
@@ -90,6 +97,7 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:1
   <div class="m" id="wm"></div>
   <div id="fc"></div>
   <div class="moon" id="moon"></div>
+  <div id="ak"><div class="at2" id="akt"></div><div class="tt" id="akh"></div><div class="tx" id="akx"><span id="aks"></span></div><div class="nn2" id="akn"></div><div class="ft">حصن المسلم · ►: العودة للطقس</div></div>
 </section>
 <section class="card c1">
   <div class="city">حمص عاصمة الثورة</div>
@@ -104,7 +112,21 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:1
 </section>
 </main>
 <div id="set"><div class="sc"><h2>تعديل دقائق الأذان</h2><div id="sl2"></div><div class="sh">▲▼ تنقّل &nbsp;·&nbsp; ◄ ► تعديل الدقائق &nbsp;·&nbsp; OK على «حفظ وإغلاق» &nbsp;·&nbsp; Back للإغلاق</div></div></div>
-<div id="hint">OK: تعديل دقائق الأذان &nbsp;·&nbsp; ◄: إطفاء الشاشة &nbsp;·&nbsp; ▲: تشغيل/إيقاف التكبير &nbsp;·&nbsp; ▼: تجربة الصوت</div>
+<div id="hint">►: أذكار الصباح/المساء ↔ الطقس &nbsp;·&nbsp; OK: تعديل دقائق الأذان &nbsp;·&nbsp; ◄: إطفاء الشاشة &nbsp;·&nbsp; ▲: تشغيل/إيقاف التكبير &nbsp;·&nbsp; ▼: تجربة الصوت</div>
+<script>
+/* ملاءمة كل المقاسات + فرض العرض: إن كانت الشاشة طولية يُدار المحتوى 90° ليظهر بالعرض دائماً */
+(function(){
+ function fit(){var w=window.innerWidth,h=window.innerHeight,rot=h>w,ew=rot?h:w,eh=rot?w:h,r=document.documentElement,b=document.body;
+  r.style.fontSize=Math.max(6,Math.min(ew*.011,eh*.0195))+"px";
+  if(rot){b.style.cssText="position:fixed;top:0;left:0;width:"+h+"px;height:"+w+"px;transform-origin:0 0;transform:translateX("+w+"px) rotate(90deg)"}
+  else b.style.cssText="";}
+ window.addEventListener("resize",fit);window.addEventListener("orientationchange",function(){setTimeout(fit,200)});
+ document.addEventListener("DOMContentLoaded",fit);fit();
+})();
+</script>
+<script src="adhkar.js"></script>
+<script src="adhkar_more.js"></script>
+<script src="names.js"></script>
 <script>
 (function(){
 var LAT=34.7324,LNG=36.7137,TZ=3,R=Math.PI/180;
@@ -117,16 +139,18 @@ var CLI=[[12,3],[14,4],[18,7],[24,11],[29,15],[33,19],[35,21],[36,22],[33,19],[2
 var FACTS=["💡 حمص ثالث أكبر المدن السورية، وتقع على نهر العاصي","💡 تقع حمص وسط سوريا على بُعد نحو 160 كم شمال دمشق","💡 ترتفع حمص نحو 500 م عن سطح البحر، ومناخها متوسطي معتدل","💡 كان اسمها القديم «إميسا»، وكانت مدينة مهمة في العصر الروماني","💡 قلعة الحصن قرب حمص مدرجة على قائمة اليونسكو للتراث العالمي منذ 2006","💡 جامع خالد بن الوليد من أشهر معالم حمص وأبرز مساجدها","💡 كنيسة أم الزنار في حمص القديمة من أقدم كنائس سوريا","💡 محافظة حمص أكبر محافظات سوريا مساحةً، وتضم مدينة تدمر الأثرية","💡 تضم حمص جامعة حمص، إحدى الجامعات الحكومية السورية","💡 بحيرة قطينة (بحيرة حمص) تقع جنوب غرب المدينة","💡 «فتحة حمص» ممر طبيعي بين الجبال يسمح بوصول رياح البحر والأمطار للداخل","💡 تُلقّب حمص بـ«أم الحجارة السوداء» نسبةً إلى حجارتها البازلتية","💡 قريبة من وادي النصارى الذي يضم قلعة الحصن وقرى تاريخية","💡 التوقيت في سوريا ثابت على GMT+3 طوال العام","💡 هذا التطبيق من تطوير المهندس عبدالرحمن حوا وهو مجاني تماماً، ادعوا لي بالتوفيق 🤲"];
 var VERSES=["📖 «أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ» — الرعد 28","📖 «إِنَّ مَعَ الْعُسْرِ يُسْرًا» — الشرح 6","📖 «وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ» — الطلاق 3","📖 «فَاذْكُرُونِي أَذْكُرْكُمْ» — البقرة 152","📖 «وَقُل رَّبِّ زِدْنِي عِلْمًا» — طه 114","📖 «إِنَّ اللَّهَ مَعَ الصَّابِرِينَ» — البقرة 153","📖 «وَرَحْمَتِي وَسِعَتْ كُلَّ شَيْءٍ» — الأعراف 156","📖 «تبسّمك في وجه أخيك صدقة» — حديث شريف","📖 «الكلمة الطيبة صدقة» — متفق عليه","📖 سبحان الله وبحمده، سبحان الله العظيم","📖 لا حول ولا قوة إلا بالله، كنز من كنوز الجنة","📖 اللهم صلِّ وسلِّم على نبينا محمد"];
 function pt(y,m,d){
- var D=Date.UTC(y,m,d,12)/864e5+2440587.5-2451545;
- var g=(357.529+.98560028*D)%360*R,q=((280.459+.98564736*D)%360+360)%360;
- var L=(q+1.915*Math.sin(g)+.02*Math.sin(2*g))*R,e=(23.439-4e-7*D)*R;
- var dec=Math.asin(Math.sin(e)*Math.sin(L));
- var ra=Math.atan2(Math.cos(e)*Math.sin(L),Math.cos(L))/R/15;ra=(ra+24)%24;
- var eq=q/15-ra;eq=((eq+12)%24+24)%24-12;
- var noon=12+TZ-LNG/15-eq+.017;
+ // حساب فلكي دقيق (NOAA) معايَر على جدول وزارة الأوقاف لحمص: فجر 18° وعشاء 17° وشروق/غروب 0.833° مع +1 د للظهر و+2 د للمغرب
+ var D=Date.UTC(y,m,d,12)/864e5+2440587.5-2451545,T=D/36525;
+ var L0=((280.46646+36000.76983*T+.0003032*T*T)%360+360)%360,M=(357.52911+35999.05029*T-.0001537*T*T)*R;
+ var C=(1.914602-.004817*T-.000014*T*T)*Math.sin(M)+(.019993-.000101*T)*Math.sin(2*M)+.000289*Math.sin(3*M);
+ var om=(125.04-1934.136*T)*R,lam=(L0+C-.00569-.00478*Math.sin(om))*R,ep=(23.439291-.0130042*T+.00256*Math.cos(om))*R;
+ var dec=Math.asin(Math.sin(ep)*Math.sin(lam));
+ var yy=Math.pow(Math.tan(ep/2),2),l0=L0*R,ec=.016708634-.000042037*T;
+ var eq=4*(yy*Math.sin(2*l0)-2*ec*Math.sin(M)+4*ec*yy*Math.sin(M)*Math.cos(2*l0)-.5*yy*yy*Math.sin(4*l0)-1.25*ec*ec*Math.sin(2*M))/R/60;
+ var noon=12+TZ-LNG/15-eq;
  function h(a){return Math.acos((Math.sin(a*R)-Math.sin(LAT*R)*Math.sin(dec))/(Math.cos(LAT*R)*Math.cos(dec)))/R/15}
  var asr=Math.atan(1/(1+Math.tan(Math.abs(LAT*R-dec))))/R;
- return [noon-h(-18),noon-h(-.833),noon,noon+h(asr),noon+h(-.833),noon+h(-17)];
+ return [noon-h(-18),noon-h(-.833),noon+1/60,noon+h(asr),noon+h(-.833)+2/60,noon+h(-17)];
 }
 function PT(y,m,d){return pt(y,m,d).map(function(v,i){return v+adj[i]/60})}
 function f2(x){x=((x%24)+24)%24;var m=Math.round(x*60),H=Math.floor(m/60)%24,M=m%60;return(H%12||12)+":"+z(M)+(H>=12?" م":" ص")}
@@ -157,7 +181,9 @@ function daily(n,T){
  var r=ramadan(n);if(r)dyn.push(r);
  dyn.push("🧭 اتجاه القبلة من حمص: "+qb+"° من الشمال");
  dyn.push("☀️ طول النهار اليوم: "+dh+" ساعة و"+dm+" دقيقة");
- var a=[FACTS,VERSES,dyn],o=[];for(var i=0;i<16;i++)a.forEach(function(x){if(x[i])o.push(x[i])});all=o;
+ var nm2=[],AS=window.ASMA||[],doy=Math.floor((Date.UTC(Y,M,Dd)-Date.UTC(Y,0,0))/864e5);
+ for(var q=0;q<16&&AS.length;q++){var z=AS[(doy*16+q)%AS.length];nm2.push("✨ من أسماء الله الحسنى: «"+z[0]+"» — "+z[1])}
+ var a=[FACTS,VERSES,dyn,nm2],o=[];for(var i=0;i<16;i++)a.forEach(function(x){if(x[i])o.push(x[i])});all=o;
  $("moon").textContent=moon();
  if(!window.wLive){var c=CLI[M];$("wt").textContent=Math.round((c[0]+c[1])/2)+"°";$("wd").textContent="متوسط شهر "+MON[M];$("wm").textContent="العظمى "+c[0]+"° · الصغرى "+c[1]+"°";$("wi").textContent=c[0]>27?"☀️":c[0]>17?"⛅":"☁️";$("wtag").textContent="معدلات مناخية"}
 }
@@ -208,7 +234,35 @@ window.rk=function(k){if(!sOpen)return;
  else if(k==="left"||k==="right"){var d=k==="right"?1:-1;if(sIdx<6){adj[sIdx]=Math.max(-60,Math.min(60,adj[sIdx]+d));saveAdj()}else if(sIdx===6)togAd()}
  else if(k==="ok"){if(sIdx===6)togAd();else if(sIdx===7){adj=[0,0,0,0,0,0];saveAdj()}else if(sIdx===8){sClose();return}}
  sRender()};
-if(!window.App)document.addEventListener("keydown",function(e){var m={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right",Enter:"ok",Escape:"back"}[e.key];if(!m)return;if(!sOpen&&m==="ok")window.openSettings();else window.rk(m)});
+if(!window.App)document.addEventListener("keydown",function(e){var m={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right",Enter:"ok",Escape:"back"}[e.key];if(!sOpen&&e.key==="ArrowRight"){window.togAk();return}if(!m)return;if(!sOpen&&m==="ok")window.openSettings();else window.rk(m)});
+/* أذكار الصباح (من الفجر حتى قبل الظهر بنصف ساعة) والمساء (من العصر حتى بعد العشاء بساعتين) بدل الطقس؛ زر ► يبدّل بينها وبين الطقس */
+var AKD=window.ADHKAR||[],ak={m:"",pg:[],pi:0,until:0,off:""};
+function akChunks(t){var out=[],w=t.replace(/\s*\n\s*/g," ").split(" "),cur="";
+ w.forEach(function(x){if(cur&&(cur+" "+x).length>150){var k=Math.max(cur.lastIndexOf("،"),cur.lastIndexOf("."),cur.lastIndexOf("؟"));
+   if(k>cur.length*.55&&k<cur.length-1){out.push(cur.slice(0,k+1));cur=cur.slice(k+1).trim()+" "+x}else{out.push(cur);cur=x}}else cur=cur?cur+" "+x:x});
+ if(cur.trim())out.push(cur.trim());return out}
+function akCnt(x){if(x.c)return x.c;var n=x.n;return n===1?"مرة واحدة":n===2?"مرتان":n<=10?n+" مرات":n+" مرة"}
+var TENX={t:"ذكر ما بعد الفجر والمغرب",n:10,a:"لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ"};
+function akBuild(md){var L,pg=[];if(md[0]==="s"){var C=(window.ADHKAR_CATS||[]).filter(function(c){return c.k==="salah"})[0];L=C?C.items.slice():[];if(md==="st")L.unshift(TENX)}else L=AKD.filter(function(x){return!x.w||x.w===md});
+ L.forEach(function(x,i){var e=md==="e",t=e&&x.t2?x.t2:x.t,a=e&&x.e?x.e:x.a,c=[a.replace(/\s*\n\s*/g," ")];
+  c.forEach(function(z,j){pg.push({h:(i+1)+". "+t,n:akCnt(x),q:x.q,tx:z,p:1,P:1,i:i+1,N:L.length})})});
+ return pg}
+function akMode(){var n=new Date(Date.now()+TZ*36e5),T=PT(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate()),h=n.getUTCHours()+n.getUTCMinutes()/60+n.getUTCSeconds()/3600;
+ for(var i=0;i<6;i++)if(i!==1&&h>=T[i]&&h<T[i]+1/3)return i===0||i===4?"st":"s";
+ if(h>=T[0]&&h<T[2]-.5)return"m";if(h>=T[3]&&h<T[5]+2)return"e";return""}
+function akShow(g){var tx=$("akx"),sp=$("aks");$("akt").textContent=ak.m==="m"?"☀️ أذكار الصباح":ak.m==="e"?"🌙 أذكار المساء":"🤲 أذكار بعد الصلاة";$("akh").textContent=g.h;
+ sp.textContent=g.tx;tx.className="tx"+(g.q?" q":"");$("akn").innerHTML="العدد: <b>"+g.n+"</b>"+(g.P>1?" · الجزء "+g.p+"/"+g.P:"")+" · "+g.i+"/"+g.N;
+ var fs=g.tx.length<60?3.6:g.tx.length<110?3:g.tx.length<200?2.6:2.2;tx.style.fontSize=fs+"rem";
+ while((sp.offsetHeight>tx.clientHeight||sp.offsetWidth>tx.clientWidth)&&fs>.6){fs-=.05;tx.style.fontSize=fs+"rem"}}
+function akTick(){var md=akMode(),n=new Date(Date.now()+TZ*36e5),dk=md+n.getUTCFullYear()+"-"+n.getUTCMonth()+"-"+n.getUTCDate(),on=!!md&&ak.off!==dk,sec=document.querySelector(".c2");
+ if(sec.classList.contains("ak")!==on)sec.classList.toggle("ak",on);
+ if(!on){ak.m="";return}
+ if(ak.m!==md){ak.m=md;ak.pg=akBuild(md);ak.pi=0;ak.until=0}
+ if(!ak.pg.length)return;
+ if(Date.now()>=ak.until){var g=ak.pg[ak.pi%ak.pg.length];akShow(g);ak.pi=(ak.pi+1)%ak.pg.length;ak.until=Date.now()+10000}}
+window.togAk=function(){var md=akMode();if(!md)return;var n=new Date(Date.now()+TZ*36e5),dk=md+n.getUTCFullYear()+"-"+n.getUTCMonth()+"-"+n.getUTCDate();ak.off=ak.off===dk?"":dk;ak.until=0;akTick()};
+window.akDbg=function(){return{mode:akMode(),pages:ak.pg.length,build:akBuild,show:akShow,st:ak}};
+setInterval(akTick,1000);akTick();
 tick();setInterval(tick,1000);weather();setInterval(weather,18e5);
 })();
 </script>

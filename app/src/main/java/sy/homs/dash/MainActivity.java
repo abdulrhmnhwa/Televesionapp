@@ -1,6 +1,7 @@
 package sy.homs.dash;
 
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -30,6 +31,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
@@ -122,6 +124,9 @@ public class MainActivity extends Activity {
                 case KeyEvent.KEYCODE_DPAD_CENTER:
                 case KeyEvent.KEYCODE_ENTER:
                     w.evaluateJavascript("window.openSettings&&window.openSettings()", null);
+                    return true;
+                case KeyEvent.KEYCODE_DPAD_RIGHT:
+                    w.evaluateJavascript("window.togAk&&window.togAk()", null);
                     return true;
                 case KeyEvent.KEYCODE_DPAD_LEFT:
                     sleep();

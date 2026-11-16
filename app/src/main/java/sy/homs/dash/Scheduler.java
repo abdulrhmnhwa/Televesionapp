@@ -28,19 +28,21 @@ public class Scheduler {
         Calendar n = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         n.clear();
         n.set(y, m, d, 12, 0, 0);
-        double D = n.getTimeInMillis() / 86400000.0 + 2440587.5 - 2451545;
-        double g = ((357.529 + .98560028 * D) % 360) * R;
-        double q = ((280.459 + .98564736 * D) % 360 + 360) % 360;
-        double L = (q + 1.915 * Math.sin(g) + .02 * Math.sin(2 * g)) * R;
-        double e = (23.439 - 4e-7 * D) * R;
-        double dec = Math.asin(Math.sin(e) * Math.sin(L));
-        double ra = Math.atan2(Math.cos(e) * Math.sin(L), Math.cos(L)) / R / 15;
-        ra = (ra + 24) % 24;
-        double eq = q / 15 - ra;
-        eq = ((eq + 12) % 24 + 24) % 24 - 12;
-        double noon = 12 + TZ - LNG / 15 - eq + .017;
+        double D = n.getTimeInMillis() / 86400000.0 + 2440587.5 - 2451545, T = D / 36525;
+        // حساب فلكي دقيق (NOAA) معايَر على جدول وزارة الأوقاف لحمص: فجر 18° وعشاء 17° وشروق/غروب 0.833° مع +1 د للظهر و+2 د للمغرب
+        double L0 = ((280.46646 + 36000.76983 * T + .0003032 * T * T) % 360 + 360) % 360;
+        double M = (357.52911 + 35999.05029 * T - .0001537 * T * T) * R;
+        double C = (1.914602 - .004817 * T - .000014 * T * T) * Math.sin(M) + (.019993 - .000101 * T) * Math.sin(2 * M) + .000289 * Math.sin(3 * M);
+        double om = (125.04 - 1934.136 * T) * R;
+        double lam = (L0 + C - .00569 - .00478 * Math.sin(om)) * R;
+        double ep = (23.439291 - .0130042 * T + .00256 * Math.cos(om)) * R;
+        double dec = Math.asin(Math.sin(ep) * Math.sin(lam));
+        double yy = Math.pow(Math.tan(ep / 2), 2), l0 = L0 * R, ec = .016708634 - .000042037 * T;
+        double eq = 4 * (yy * Math.sin(2 * l0) - 2 * ec * Math.sin(M) + 4 * ec * yy * Math.sin(M) * Math.cos(2 * l0)
+                - .5 * yy * yy * Math.sin(4 * l0) - 1.25 * ec * ec * Math.sin(2 * M)) / R / 60;
+        double noon = 12 + TZ - LNG / 15 - eq;
         double asr = Math.atan(1 / (1 + Math.tan(Math.abs(LAT * R - dec)))) / R;
-        return new double[]{noon - h(-18, dec), noon - h(-.833, dec), noon, noon + h(asr, dec), noon + h(-.833, dec), noon + h(-17, dec)};
+        return new double[]{noon - h(-18, dec), noon - h(-.833, dec), noon + 1.0 / 60, noon + h(asr, dec), noon + h(-.833, dec) + 2.0 / 60, noon + h(-17, dec)};
     }
 
     private static double h(double a, double dec) {
@@ -60,7 +62,7 @@ public class Scheduler {
             mid.set(y, m, d, 0, 0, 0);
             long base = mid.getTimeInMillis() - TZ * 3600000L;
             for (int i : new int[]{0, 2, 3, 4, 5}) {
-                long tr = base + (long) ((t[i] * 60 + adj[i]) * 60000);
+                long tr = base + Math.round(t[i] * 60 + adj[i]) * 60000L; // تقريب لأقرب دقيقة كما في الشاشة
                 if (tr > now + 20000) { idx = i; return tr; }
             }
         }

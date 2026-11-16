@@ -31,7 +31,7 @@
             android:launchMode="singleTask"
             android:showWhenLocked="true"
             android:turnScreenOn="true"
-            android:screenOrientation="landscape"
+            android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard|navigation|uiMode|layoutDirection">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
