@@ -27,7 +27,7 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:1
 .city{text-align:center;font-size:2.3rem;color:var(--gold);font-weight:700}
 .clock{display:flex;justify-content:center;align-items:center;gap:1rem;direction:ltr}
 .ap{display:flex;flex-direction:column;align-items:center;line-height:1.15}
-.ap i{font-style:normal;font-weight:700;font-size:2.4rem;color:var(--gold)}
+.ap b{font-style:normal;font-weight:700;font-size:2.4rem;color:var(--gold)}
 .ap em{font-style:normal;font-size:1.9rem;color:var(--mut)}
 #hm{font-size:8.4rem;line-height:1;font-weight:700}
 .dates{text-align:center;font-size:1.8rem;line-height:1.65}.dates span{color:var(--gold)}
@@ -68,8 +68,7 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:1
 .p.on{background:var(--g);border:1px solid var(--gold)}
 .p.on span:first-child:before{content:"◄ ";color:var(--gold)}
 .tm{display:flex;align-items:baseline;gap:.7rem}
-.tm i{font-style:normal;font-weight:400;font-size:1.3rem;color:var(--mut)}
-.tm b{font-weight:700}
+.tm b{font-weight:700;font-style:normal}
 .src{text-align:center;font-size:.95rem;color:var(--mut);opacity:.7;margin-top:.4rem}
 #hint{position:fixed;left:0;right:0;bottom:.4rem;text-align:center;font-size:1rem;color:var(--mut);opacity:.65}
 .p small b{font-weight:700}.p small{white-space:nowrap;font-size:.95rem;margin-inline-start:.4rem}.p>span:first-child{white-space:nowrap}
@@ -115,7 +114,7 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:1
 </section>
 <section class="card c1">
   <div class="city">حمص عاصمة الثورة</div>
-  <div class="clock"><div class="ap"><i id="apm"></i><em id="sec"></em></div><b id="hm">--:--</b></div>
+  <div class="clock"><div class="ap"><b id="apm"></b><em id="sec"></em></div><b id="hm">--:--</b></div>
   <div class="dates" id="dates"></div>
   <div id="cb"><span id="cbs"></span></div>
   <div class="info" id="info"></div>
@@ -252,7 +251,7 @@ function cdRender(){var h="";
  else{var it=cdItems(),nm={s:"💾 حفظ",d:"🗑️ حذف البطاقة",c:"إلغاء"};
   h='<textarea id="cdt" rows="4" class="'+(cdSel===0?"f":"")+'" placeholder="اكتب نص البطاقة هنا"></textarea>';
   for(var j=1;j<it.length;j++)h+='<div class="sx'+(cdSel===j?" f":"")+'"><span>'+nm[it[j]]+'</span></div>';
-  $("cdl").innerHTML=h;var ta=$("cdt");ta.value=cdText;ta.oninput=function(){cdText=ta.value};
+  $("cdl").innerHTML=h;var ta=$("cdt");ta.value=cdText;ta.oninput=function(){cdText=ta.value};ta.onfocus=function(){cdSel=0;if(!cdTyping)cdK(true)};ta.onclick=function(){cdK(true);ta.focus()};
   $("cdh").textContent=cdSel===0?"OK للكتابة · بعد الانتهاء اضغط ▼ للانتقال إلى «حفظ» (أو Back)":"▲▼ تنقّل · OK تنفيذ · Back رجوع"}}
 function cdOpenUI(){cdOpen=true;cdMode="l";cdSel=0;$("cd").className="on";cdRender()}
 function cdClose(){cdK(false);cdOpen=false;$("cd").className="";saveAdj();sRender()}

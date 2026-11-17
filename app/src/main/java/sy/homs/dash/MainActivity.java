@@ -39,8 +39,19 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> {
                 InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 if (im == null) return;
-                if (on) { w.requestFocus(); im.showSoftInput(w, InputMethodManager.SHOW_IMPLICIT); }
-                else im.hideSoftInputFromWindow(w.getWindowToken(), 0);
+                if (on) {
+                    // الـ WebView كان غير قابل للتركيز فلا تظهر لوحة المفاتيح: نفعّل التركيز أثناء الكتابة فقط
+                    w.setFocusable(true);
+                    w.setFocusableInTouchMode(true);
+                    w.requestFocus();
+                    w.evaluateJavascript("(function(){var t=document.getElementById('cdt');if(t)t.focus()})()", null);
+                    w.postDelayed(() -> im.showSoftInput(w, InputMethodManager.SHOW_IMPLICIT), 150);
+                    w.postDelayed(() -> { if (typing) im.showSoftInput(w, InputMethodManager.SHOW_FORCED); }, 500);
+                } else {
+                    im.hideSoftInputFromWindow(w.getWindowToken(), 0);
+                    w.setFocusable(false);
+                    w.setFocusableInTouchMode(false);
+                }
             });
         }
         @JavascriptInterface public void setAdhan(boolean o) { Prefs.set(MainActivity.this, o); Scheduler.schedule(MainActivity.this); runOnUiThread(() -> push()); }
@@ -80,13 +91,21 @@ public class MainActivity extends Activity {
         setContentView(fl);
 
         cur = this;
-        // لفتح التطبيق تلقائياً عند الإقلاع/تشغيل الشاشة يلزم إذن «الظهور فوق التطبيقات»: نطلبه مرة واحدة فقط
+        // أذونات لازمة للتشغيل التلقائي: إشعارات (13+)، الظهور فوق التطبيقات، استثناء توفير البطارية
         try {
-            if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(this)
-                    && !getSharedPreferences("p", 0).getBoolean("askedOv", false)) {
-                getSharedPreferences("p", 0).edit().putBoolean("askedOv", true).apply();
-                Toast.makeText(this, "فعّل «الظهور فوق التطبيقات» ليفتح التطبيق تلقائياً عند التشغيل", Toast.LENGTH_LONG).show();
+            android.content.SharedPreferences sp = getSharedPreferences("p", 0);
+            if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission("android.permission.POST_NOTIFICATIONS") != android.content.pm.PackageManager.PERMISSION_GRANTED
+                    && !sp.getBoolean("askedNt", false)) {
+                sp.edit().putBoolean("askedNt", true).apply();
+                requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, 1);
+            } else if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(this) && sp.getInt("askedOvN", 0) < 3) {
+                sp.edit().putInt("askedOvN", sp.getInt("askedOvN", 0) + 1).apply();
+                Toast.makeText(this, "فعّل «الظهور فوق التطبيقات» ليفتح التطبيق تلقائياً عند تشغيل الشاشة", Toast.LENGTH_LONG).show();
                 startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())));
+            } else if (Build.VERSION.SDK_INT >= 23 && !sp.getBoolean("askedBat", false)
+                    && !((android.os.PowerManager) getSystemService(Context.POWER_SERVICE)).isIgnoringBatteryOptimizations(getPackageName())) {
+                sp.edit().putBoolean("askedBat", true).apply();
+                startActivity(new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:" + getPackageName())));
             }
         } catch (Throwable ignored) {}
         Scheduler.schedule(this);
@@ -195,7 +214,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    @Override protected void onResume() { super.onResume(); fg = true; w.onResume(); w.resumeTimers(); Scheduler.schedule(this); push(); }
+    @Override protected void onResume() { super.onResume(); fg = true; try { ((android.app.NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).cancel(8); } catch (Throwable ignored) {} KeepAliveService.start(this); w.onResume(); w.resumeTimers(); Scheduler.schedule(this); push(); }
     @Override protected void onPause() { fg = false; w.onPause(); super.onPause(); }
     @Override protected void onDestroy() { if (cur == this) cur = null; w.destroy(); super.onDestroy(); }
 }
