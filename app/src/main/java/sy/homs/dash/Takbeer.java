@@ -13,13 +13,16 @@ import java.util.Locale;
 
 public class Takbeer {
     /** يشغّل assets/takbeer.mp3 إن وُجد، وإلا ينطق «الله أكبر» مرتين بمحرك النطق */
-    public static void play(final Context c, final Runnable done) {
+    public static void play(final Context c, final Runnable done) { playAsset(c, "takbeer.mp3", "الله أكبر", done); }
+
+    /** يشغّل ملف الصوت من assets إن وُجد، وإلا ينطق العبارة مرتين بمحرك النطق */
+    public static void playAsset(final Context c, final String asset, final String phrase, final Runnable done) {
         final Handler h = new Handler(Looper.getMainLooper());
         final boolean[] fin = {false};
         final Runnable end = () -> { if (!fin[0]) { fin[0] = true; done.run(); } };
         h.postDelayed(end, 15000);
         try {
-            AssetFileDescriptor afd = c.getAssets().openFd("takbeer.mp3");
+            AssetFileDescriptor afd = c.getAssets().openFd(asset);
             final MediaPlayer mp = new MediaPlayer();
             mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
             afd.close();
@@ -39,8 +42,8 @@ public class Takbeer {
                 @Override public void onDone(String id) { if ("b".equals(id)) { t[0].shutdown(); end.run(); } }
                 @Override public void onError(String id) { t[0].shutdown(); end.run(); }
             });
-            t[0].speak("الله أكبر", TextToSpeech.QUEUE_FLUSH, null, "a");
-            t[0].speak("الله أكبر", TextToSpeech.QUEUE_ADD, null, "b");
+            t[0].speak(phrase, TextToSpeech.QUEUE_FLUSH, null, "a");
+            t[0].speak(phrase, TextToSpeech.QUEUE_ADD, null, "b");
         });
     }
 }

@@ -3,7 +3,11 @@ package sy.homs.dash;
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -11,20 +15,34 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.content.Context;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
     static MainActivity cur;
+    static volatile boolean fg;
     private WebView w;
     private View black;
     private boolean sleeping;
     private volatile boolean settingsOpen;
+    private volatile boolean typing;
 
     public class Bridge {
         @JavascriptInterface public String get() { return Prefs.cfg(MainActivity.this); }
         @JavascriptInterface public void save(String j) { Prefs.setCfg(MainActivity.this, j); Scheduler.schedule(MainActivity.this); }
-        @JavascriptInterface public void setSettings(boolean o) { settingsOpen = o; }
+        @JavascriptInterface public void setSettings(boolean o) { settingsOpen = o; if (!o) typing = false; }
+        /** تشغيل/إخفاء لوحة المفاتيح أثناء كتابة نص بطاقة */
+        @JavascriptInterface public void kb(final boolean on) {
+            typing = on;
+            runOnUiThread(() -> {
+                InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (im == null) return;
+                if (on) { w.requestFocus(); im.showSoftInput(w, InputMethodManager.SHOW_IMPLICIT); }
+                else im.hideSoftInputFromWindow(w.getWindowToken(), 0);
+            });
+        }
         @JavascriptInterface public void setAdhan(boolean o) { Prefs.set(MainActivity.this, o); Scheduler.schedule(MainActivity.this); runOnUiThread(() -> push()); }
     }
 
@@ -62,6 +80,15 @@ public class MainActivity extends Activity {
         setContentView(fl);
 
         cur = this;
+        // لفتح التطبيق تلقائياً عند الإقلاع/تشغيل الشاشة يلزم إذن «الظهور فوق التطبيقات»: نطلبه مرة واحدة فقط
+        try {
+            if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(this)
+                    && !getSharedPreferences("p", 0).getBoolean("askedOv", false)) {
+                getSharedPreferences("p", 0).edit().putBoolean("askedOv", true).apply();
+                Toast.makeText(this, "فعّل «الظهور فوق التطبيقات» ليفتح التطبيق تلقائياً عند التشغيل", Toast.LENGTH_LONG).show();
+                startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())));
+            }
+        } catch (Throwable ignored) {}
         Scheduler.schedule(this);
         KeepAliveService.start(this);
         w.loadUrl("file:///android_asset/index.html");
@@ -109,6 +136,8 @@ public class MainActivity extends Activity {
         }
         int kc = e.getKeyCode();
         if (settingsOpen) {
+            if (typing && kc != KeyEvent.KEYCODE_BACK && kc != KeyEvent.KEYCODE_DPAD_UP && kc != KeyEvent.KEYCODE_DPAD_DOWN)
+                return super.dispatchKeyEvent(e); // أثناء الكتابة: الأسهم ▲▼ وBack فقط للتنقّل، والباقي للنص
             String k = kc == KeyEvent.KEYCODE_DPAD_UP ? "up" : kc == KeyEvent.KEYCODE_DPAD_DOWN ? "down"
                     : kc == KeyEvent.KEYCODE_DPAD_LEFT ? "left" : kc == KeyEvent.KEYCODE_DPAD_RIGHT ? "right"
                     : (kc == KeyEvent.KEYCODE_DPAD_CENTER || kc == KeyEvent.KEYCODE_ENTER) ? "ok"
@@ -166,7 +195,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    @Override protected void onResume() { super.onResume(); w.onResume(); w.resumeTimers(); Scheduler.schedule(this); push(); }
-    @Override protected void onPause() { w.onPause(); super.onPause(); }
+    @Override protected void onResume() { super.onResume(); fg = true; w.onResume(); w.resumeTimers(); Scheduler.schedule(this); push(); }
+    @Override protected void onPause() { fg = false; w.onPause(); super.onPause(); }
     @Override protected void onDestroy() { if (cur == this) cur = null; w.destroy(); super.onDestroy(); }
 }

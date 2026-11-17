@@ -10,13 +10,21 @@ public class AdhanReceiver extends BroadcastReceiver {
         String a = i.getAction();
         if (Intent.ACTION_BOOT_COMPLETED.equals(a) || Intent.ACTION_MY_PACKAGE_REPLACED.equals(a)
                 || "android.intent.action.QUICKBOOT_POWERON".equals(a)) {
-            KeepAliveService.start(c);
+            KeepAliveService.start(c, !Intent.ACTION_MY_PACKAGE_REPLACED.equals(a));
         }
         if (Scheduler.ACT.equals(a) && Prefs.on(c)) {
             long t = i.getLongExtra("t", 0);
             if (Fire.claim(c, t)) {
                 final PendingResult pr = goAsync();
                 Fire.go(c.getApplicationContext(), pr::finish);
+            }
+            KeepAliveService.start(c);
+        }
+        if (Scheduler.ACT_IQ.equals(a) && Prefs.iqOn(c)) {
+            long t = i.getLongExtra("t", 0);
+            if (Fire.claimIq(c, t)) {
+                final PendingResult pr = goAsync();
+                Fire.goIq(c.getApplicationContext(), pr::finish);
             }
             KeepAliveService.start(c);
         }

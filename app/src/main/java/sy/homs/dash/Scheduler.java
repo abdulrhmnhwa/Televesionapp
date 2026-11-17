@@ -11,6 +11,7 @@ import java.util.TimeZone;
 
 public class Scheduler {
     public static final String ACT = "sy.homs.dash.ADHAN";
+    public static final String ACT_IQ = "sy.homs.dash.IQAMA";
     static final double LAT = 34.7324, LNG = 36.7137, R = Math.PI / 180;
     static final int TZ = 3;
     static final String[] NAMES = {"الفجر", "الشروق", "الظهر", "العصر", "المغرب", "العشاء"};
@@ -69,7 +70,50 @@ public class Scheduler {
         return -1;
     }
 
+    /** أقرب موعد إقامة (نهاية مدة الإقامة بعد الأذان) */
+    static long nextIq(long now, double[] adj, int[] iq) {
+        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        c.setTimeInMillis(now + TZ * 3600000L);
+        for (int add = 0; add < 3; add++) {
+            Calendar day = (Calendar) c.clone();
+            day.add(Calendar.DAY_OF_MONTH, add);
+            int y = day.get(Calendar.YEAR), m = day.get(Calendar.MONTH), d = day.get(Calendar.DAY_OF_MONTH);
+            double[] t = times(y, m, d);
+            Calendar mid = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            mid.clear();
+            mid.set(y, m, d, 0, 0, 0);
+            long base = mid.getTimeInMillis() - TZ * 3600000L;
+            for (int i : new int[]{0, 2, 3, 4, 5}) {
+                if (iq[i] <= 0) continue;
+                long tr = base + (Math.round(t[i] * 60 + adj[i]) + iq[i]) * 60000L;
+                if (tr > now + 20000) return tr;
+            }
+        }
+        return -1;
+    }
+
+    static void scheduleIq(Context c) {
+        AlarmManager am = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
+        long t = nextIq(System.currentTimeMillis(), Prefs.adj(c), Prefs.iq(c));
+        Intent i = new Intent(c, AdhanReceiver.class).setAction(ACT_IQ);
+        i.putExtra("t", t);
+        PendingIntent pi = PendingIntent.getBroadcast(c, 2, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        if (!Prefs.iqOn(c) || t < 0) {
+            am.cancel(pi);
+            c.getSharedPreferences("p", 0).edit().putLong("nextIq", 0).apply();
+            return;
+        }
+        c.getSharedPreferences("p", 0).edit().putLong("nextIq", t).apply();
+        try {
+            PendingIntent show = PendingIntent.getActivity(c, 3, new Intent(c, MainActivity.class), PendingIntent.FLAG_IMMUTABLE);
+            am.setAlarmClock(new AlarmManager.AlarmClockInfo(t, show), pi);
+        } catch (Exception e) {
+            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, t, pi);
+        }
+    }
+
     public static void schedule(Context c) {
+        scheduleIq(c);
         AlarmManager am = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
         long t = next(System.currentTimeMillis(), Prefs.adj(c));
         Intent i = new Intent(c, AdhanReceiver.class).setAction(ACT);
